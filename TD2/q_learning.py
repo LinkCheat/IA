@@ -13,14 +13,23 @@ def update_q_table(Q, s, a, r, sprime, alpha, gamma):
     the reward, the next state sprime, alpha the learning rate and gamma the discount factor.
     Return the same input Q but updated for the pair s and a.
     """
+    best_next_action = np.argmax(Q[sprime])
+    td_target = r + gamma * Q[sprime, best_next_action]
+    td_error = td_target - Q[s, a]
+    Q[s, a] += alpha * td_error
+    return Q
 
 
-def epsilon_greedy(Q, s, epsilone):
+def epsilon_greedy(Q, s, epsilon):
     """
     This function implements the epsilon greedy algorithm.
     Takes as unput the Q function for all states, a state s, and epsilon.
     It should return the action to take following the epsilon greedy algorithm.
     """
+    if random.uniform(0, 1) < epsilon:
+        return random.choice(range(len(Q[s])))
+    else:
+        return np.argmax(Q[s])
 
 
 if __name__ == "__main__":
@@ -47,7 +56,7 @@ if __name__ == "__main__":
         S, _ = env.reset()
 
         for _ in range(max_itr_per_epoch):
-            A = epsilon_greedy(Q=Q, s=S, epsilone=epsilon)
+            A = epsilon_greedy(Q=Q, s=S, epsilon=epsilon)
 
             Sprime, R, done, _, info = env.step(A)
 
@@ -66,6 +75,11 @@ if __name__ == "__main__":
     print("Average reward = ", np.mean(rewards))
 
     # plot the rewards in function of epochs
+    plt.plot(rewards)
+    plt.xlabel('Episode')
+    plt.ylabel('Reward')
+    plt.title('Rewards over time')
+    plt.show()
 
     print("Training finished.\n")
 
